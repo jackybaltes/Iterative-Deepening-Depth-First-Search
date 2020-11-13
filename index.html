@@ -1,0 +1,998 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>Iterative Deepening Depth First Search</title>
+
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/ntnuerc.css">
+
+        <!-- Theme used for syntax highlighting of code -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+        <script src="https://daybrush.com/scenejs/release/latest/dist/scene.min.js"></script>
+		
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
+        <script src="js/ntnu.js"></script>
+    </head>
+    <body>
+        <div class="reveal">
+        <div class="slides">
+            
+<section id="slide_00002_frag_00001" data-state="slide_00002_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+
+<div class="jb-output-code jb-render">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-output jb-render">
+
+<h1>Iterative Deepening Depth First Search</h1>
+
+<div>
+
+<p>
+      Jacky Baltes<br>
+      National Taiwan Normal University<br>
+      Taipei, Taiwan<br>
+      <a href="mailto:jacky.baltes@ntnu.edu.tw">jacky.baltes@ntnu.edu.tw</a><br>
+
+      13 November 2020
+</p>
+
+</div>
+</div><!-- end of jb-output jb-render -->
+</div><!-- end of jb-output-code jb-render -->
+
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-6b87da46-3f2d-460f-b541-d78e368e2550" ><span id="id-6b87da46-3f2d-460f-b541-d78e368e2550"><img id="img-id-6b87da46-3f2d-460f-b541-d78e368e2550"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-ea8fb90b-f121-4300-af7c-3c797969aa98" ><span id="id-ea8fb90b-f121-4300-af7c-3c797969aa98"><img id="img-id-ea8fb90b-f121-4300-af7c-3c797969aa98" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00003_frag_00001" data-state="slide_00003_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+
+<div class="jb-output-code jb-render">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-output jb-render">
+<div class="document">
+<div class="jb-text tiny docutils container">
+<blockquote>
+<p>Implement a solution to the <a class="reference external" href="https://en.wikipedia.org/wiki/Missionaries_and_cannibals_problem">Jealous Husband</a> problem, which is closely related to the missionaries and
+cannibal problem.</p>
+<blockquote>
+In the jealous husbands problem, there are three married heterosexual couples, that have to cross
+a river. There is a boat which can hold at most two people. No woman can be in the presence of
+another man unless her husband is also present.</blockquote>
+</blockquote>
+</div>
+</div>
+
+</div><!-- end of jb-output jb-render -->
+</div><!-- end of jb-output-code jb-render -->
+
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-a76242a9-6182-4309-bb4a-0d0059ddd99f" ><span id="id-a76242a9-6182-4309-bb4a-0d0059ddd99f"><img id="img-id-a76242a9-6182-4309-bb4a-0d0059ddd99f"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-259e7ad5-3d9e-461e-aa4c-4935259412fd" ><span id="id-259e7ad5-3d9e-461e-aa4c-4935259412fd"><img id="img-id-259e7ad5-3d9e-461e-aa4c-4935259412fd" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00004_frag_00001" data-state="slide_00004_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+
+<div class="jb-output-code jb-render">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-output jb-render">
+
+<h1>Analysis of the Jealous Husband Problem</h1>
+
+<div class="jb-text">
+<ul>
+<li>It is a good idea to estimate some of the parameters of a search problem to make sure
+that the search space is not too large</li>
+<li>The most important parameters are the average branching factor b and the search depth d</li>
+<li>Estimating the average branching factor
+<ul>
+<li>Initially, there are six people on the left side of the river</li>
+<li>The boat holds at most two people</li>
+<li>b = 6 (1 People) + 6*5 (2 People) = 36</li>
+</ul></li>
+<li>Estimating the search depth of the puzzle
+<ul>
+<li>Minimum number of moves that are necessary to solve the puzzle</li>
+<li>First two people from the left side to the right side, then one person back to left side</li>
+<li>We can move 1 person from the left side to the right side with two steps (Except the last one)</li>
+<li>5*2 - 1, 9 moves</li>
+</ul>
+</li>
+<li>Estimated complexity Minimum number of nodes to expand: 387420489 nodes</li>
+</ul>
+</div>
+</div><!-- end of jb-output jb-render -->
+</div><!-- end of jb-output-code jb-render -->
+
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-3c4523dd-06d2-44e7-b4c0-c3169232cd53" ><span id="id-3c4523dd-06d2-44e7-b4c0-c3169232cd53"><img id="img-id-3c4523dd-06d2-44e7-b4c0-c3169232cd53"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-b97a527f-8892-4f49-a407-b1f03611ad63" ><span id="id-b97a527f-8892-4f49-a407-b1f03611ad63"><img id="img-id-b97a527f-8892-4f49-a407-b1f03611ad63" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00005_frag_00001" data-state="slide_00005_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span>BOAT,H1,W1,H2,W2,H3,W3, NUM_OBJECTS <span style="color: #666666">=</span> <span style="color: #666666">0</span>,<span style="color: #666666">1</span>,<span style="color: #666666">2</span>,<span style="color: #666666">3</span>,<span style="color: #666666">4</span>,<span style="color: #666666">5</span>,<span style="color: #666666">6</span>,<span style="color: #666666">7</span>
+LEFT, RIGHT <span style="color: #666666">=</span> <span style="color: #666666">0</span>, <span style="color: #666666">1</span>
+
+initial <span style="color: #666666">=</span> [ LEFT <span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(NUM_OBJECTS) ]
+
+objNames <span style="color: #666666">=</span> [ <span style="color: #BA2121">&quot;Boat&quot;</span>, <span style="color: #BA2121">&quot;Husband 1&quot;</span>, <span style="color: #BA2121">&quot;Wife 1&quot;</span>, <span style="color: #BA2121">&quot;Husband 2&quot;</span>, <span style="color: #BA2121">&quot;Wife 2&quot;</span>, <span style="color: #BA2121">&quot;Husband 3&quot;</span>, <span style="color: #BA2121">&quot;Wife 3&quot;</span> ]
+</pre></div>
+
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-c9fb9e42-719b-46e6-9502-e6c50ecb5f68" ><span id="id-c9fb9e42-719b-46e6-9502-e6c50ecb5f68"><img id="img-id-c9fb9e42-719b-46e6-9502-e6c50ecb5f68"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-72fbe2fe-79d4-4931-bd23-24f75a86afdb" ><span id="id-72fbe2fe-79d4-4931-bd23-24f75a86afdb"><img id="img-id-72fbe2fe-79d4-4931-bd23-24f75a86afdb" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00006_frag_00001" data-state="slide_00006_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div style="small"><!-- start of style="small" -->
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">random</span>
+
+<span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">is_valid</span>( state ):
+    
+    <span style="color: #008000; font-weight: bold">for</span> w <span style="color: #AA22FF; font-weight: bold">in</span> [ W1, W2, W3 ]:
+        <span style="color: #008000; font-weight: bold">if</span> state[w] <span style="color: #666666">!=</span> state[w<span style="color: #666666">-1</span>]:
+            <span style="color: #008000; font-weight: bold">for</span> h <span style="color: #AA22FF; font-weight: bold">in</span> [ H1, H2, H3 ]:
+                <span style="color: #008000; font-weight: bold">if</span> h <span style="color: #666666">!=</span> w <span style="color: #666666">-</span> <span style="color: #666666">1</span>:
+                    <span style="color: #008000; font-weight: bold">if</span> state[h] <span style="color: #666666">==</span> state[w]:
+                        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000; font-weight: bold">False</span>
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000; font-weight: bold">True</span>
+
+<span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">5</span>):
+  state <span style="color: #666666">=</span> [ random<span style="color: #666666">.</span>randint(<span style="color: #666666">0</span>,<span style="color: #666666">1</span>) <span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(NUM_OBJECTS) ]
+  <span style="color: #008000">print</span>( <span style="color: #BA2121">f&#39;state </span><span style="color: #BB6688; font-weight: bold">{</span>state<span style="color: #BB6688; font-weight: bold">}</span><span style="color: #BA2121"> is valid </span><span style="color: #BB6688; font-weight: bold">{</span>isValid(state)<span style="color: #BB6688; font-weight: bold">}</span><span style="color: #BA2121">&#39;</span> )
+</pre></div>
+
+</div><!-- end of style="small" -->
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+<div class="jb-print jb-render">
+<div style="small"><!-- start of style="small" -->
+<div class="jb-output jb-render code" style="text-align:center">
+<div class="jb-stdout code" style="display:inline-block; width:90%">
+<pre style="small">
+state [0, 0, 0, 1, 0, 1, 0] is valid False
+state [0, 0, 0, 1, 0, 0, 1] is valid False
+state [1, 0, 1, 0, 1, 1, 1] is valid False
+state [1, 1, 0, 1, 0, 1, 1] is valid True
+state [1, 0, 1, 1, 0, 0, 1] is valid False
+</pre>
+</div>
+</div>
+
+</div><!-- end of style="small" -->
+</div><!-- end of jb-print jb-render -->
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-be28fbd8-3c38-4e20-b0af-fe183f1e4d5e" ><span id="id-be28fbd8-3c38-4e20-b0af-fe183f1e4d5e"><img id="img-id-be28fbd8-3c38-4e20-b0af-fe183f1e4d5e"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-4c70e8c4-22c5-488a-9294-425ae1616380" ><span id="id-4c70e8c4-22c5-488a-9294-425ae1616380"><img id="img-id-4c70e8c4-22c5-488a-9294-425ae1616380" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00007_frag_00001" data-state="slide_00007_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span><span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">jealous_husbands_successors</span>( state, hist <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">None</span> ):
+    children <span style="color: #666666">=</span> []
+    <span style="color: #008000; font-weight: bold">for</span> p1 <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">1</span>,NUM_OBJECTS):
+        <span style="color: #008000; font-weight: bold">if</span> state[p1] <span style="color: #666666">==</span> state[BOAT]:
+            ns <span style="color: #666666">=</span> state<span style="color: #666666">.</span>copy()
+            ns[p1] <span style="color: #666666">=</span> <span style="color: #666666">1</span> <span style="color: #666666">-</span> state[p1]
+            ns[BOAT] <span style="color: #666666">=</span> <span style="color: #666666">1</span> <span style="color: #666666">-</span> state[BOAT]
+            <span style="color: #008000; font-weight: bold">if</span> is_valid(ns):
+                children<span style="color: #666666">.</span>append( ns )
+            <span style="color: #008000; font-weight: bold">for</span> p2 <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>( p1<span style="color: #666666">+1</span>, NUM_OBJECTS ):
+                <span style="color: #008000; font-weight: bold">if</span> state[p1] <span style="color: #666666">==</span> state[p2]:
+                    ns <span style="color: #666666">=</span> state<span style="color: #666666">.</span>copy()
+                    ns[p1] <span style="color: #666666">=</span> <span style="color: #666666">1</span> <span style="color: #666666">-</span> state[p1]
+                    ns[p2] <span style="color: #666666">=</span> <span style="color: #666666">1</span> <span style="color: #666666">-</span> state[p2]
+                    ns[BOAT] <span style="color: #666666">=</span> <span style="color: #666666">1</span> <span style="color: #666666">-</span> state[BOAT]
+                    <span style="color: #008000; font-weight: bold">if</span> is_valid( ns ):
+                        children<span style="color: #666666">.</span>append(ns)
+    <span style="color: #008000; font-weight: bold">return</span> children
+
+<span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">5</span>):
+    state <span style="color: #666666">=</span> [ random<span style="color: #666666">.</span>randint(<span style="color: #666666">0</span>,<span style="color: #666666">1</span>) <span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(NUM_OBJECTS) ]
+    <span style="color: #008000">print</span>( <span style="color: #BA2121">f&#39;state </span><span style="color: #BB6688; font-weight: bold">{</span>state<span style="color: #BB6688; font-weight: bold">}</span><span style="color: #BA2121"> generates children:&#39;</span> )
+    children <span style="color: #666666">=</span> jealous_husbands_successors( state )
+    <span style="color: #008000; font-weight: bold">for</span> c <span style="color: #AA22FF; font-weight: bold">in</span> children:
+      <span style="color: #008000">print</span>( <span style="color: #BA2121">f&#39;   child </span><span style="color: #BB6688; font-weight: bold">{</span>c<span style="color: #BB6688; font-weight: bold">}</span><span style="color: #BA2121">&#39;</span>)
+</pre></div>
+
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+<div class="jb-print jb-render">
+<div class="jb-output jb-render code" style="text-align:center">
+<div class="jb-stdout code" style="display:inline-block; width:90%">
+<pre >
+state [0, 0, 1, 1, 1, 0, 0] generates children:
+   child [1, 1, 1, 1, 1, 0, 0]
+   child [1, 1, 1, 1, 1, 1, 0]
+state [1, 1, 0, 1, 0, 0, 0] generates children:
+   child [0, 0, 0, 0, 0, 0, 0]
+state [1, 1, 1, 1, 0, 0, 1] generates children:
+   child [0, 0, 1, 0, 0, 0, 1]
+   child [0, 1, 1, 0, 0, 0, 0]
+state [0, 1, 1, 0, 0, 1, 0] generates children:
+   child [1, 1, 1, 1, 0, 1, 0]
+   child [1, 1, 1, 1, 1, 1, 0]
+   child [1, 1, 1, 1, 0, 1, 1]
+   child [1, 1, 1, 0, 0, 1, 1]
+state [0, 1, 0, 1, 0, 1, 1] generates children:
+   child [1, 1, 1, 1, 0, 1, 1]
+   child [1, 1, 1, 1, 1, 1, 1]
+   child [1, 1, 0, 1, 1, 1, 1]
+</pre>
+</div>
+</div>
+
+</div><!-- end of jb-print jb-render -->
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-235c4af4-4092-46c3-8748-e7f62a1226bd" ><span id="id-235c4af4-4092-46c3-8748-e7f62a1226bd"><img id="img-id-235c4af4-4092-46c3-8748-e7f62a1226bd"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-ddd67595-b2d9-4efc-b1d5-558482275d67" ><span id="id-ddd67595-b2d9-4efc-b1d5-558482275d67"><img id="img-id-ddd67595-b2d9-4efc-b1d5-558482275d67" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00008_frag_00001" data-state="slide_00008_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span><span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">print_state</span>( state ):
+    leftObjs <span style="color: #666666">=</span> []
+    rightObjs <span style="color: #666666">=</span> []
+
+    <span style="color: #008000; font-weight: bold">for</span> o <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #008000">len</span>(state)):
+        <span style="color: #008000; font-weight: bold">if</span> state[o] <span style="color: #666666">==</span> LEFT:
+            leftObjs<span style="color: #666666">.</span>append( objNames[o] )
+        <span style="color: #008000; font-weight: bold">else</span>:
+            rightObjs<span style="color: #666666">.</span>append( objNames[o] )
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #BA2121">&quot;[&quot;</span> <span style="color: #666666">+</span> <span style="color: #BA2121">&quot;,&quot;</span><span style="color: #666666">.</span>join( leftObjs) <span style="color: #666666">+</span> <span style="color: #BA2121">&quot;],[&quot;</span> <span style="color: #666666">+</span> <span style="color: #BA2121">&quot;,&quot;</span><span style="color: #666666">.</span>join( rightObjs) <span style="color: #666666">+</span> <span style="color: #BA2121">&quot;]&quot;</span>
+
+<span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">5</span>):
+    state <span style="color: #666666">=</span> [ random<span style="color: #666666">.</span>randint(<span style="color: #666666">0</span>,<span style="color: #666666">1</span>) <span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(NUM_OBJECTS) ]
+    <span style="color: #008000">print</span>( <span style="color: #BA2121">f&#39;state </span><span style="color: #BB6688; font-weight: bold">{</span>print_state(state)<span style="color: #BB6688; font-weight: bold">}</span><span style="color: #BA2121"> generates children:&#39;</span> )
+    children <span style="color: #666666">=</span> jealous_husbands_successors( state )
+    <span style="color: #008000; font-weight: bold">for</span> c <span style="color: #AA22FF; font-weight: bold">in</span> children:
+      <span style="color: #008000">print</span>( <span style="color: #BA2121">f&#39;   child </span><span style="color: #BB6688; font-weight: bold">{</span>print_state(c)<span style="color: #BB6688; font-weight: bold">}</span><span style="color: #BA2121">&#39;</span>)
+</pre></div>
+
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+<div class="jb-print jb-render">
+<div class="jb-output jb-render code" style="text-align:center">
+<div class="jb-stdout code" style="display:inline-block; width:90%">
+<pre >
+state [Husband 1,Wife 1,Wife 3],[Boat,Husband 2,Wife 2,Husband 3] generates children:
+   child [Boat,Husband 1,Wife 1,Husband 2,Husband 3,Wife 3],[Wife 2]
+   child [Boat,Husband 1,Wife 1,Husband 3,Wife 3],[Husband 2,Wife 2]
+state [Boat,Wife 1,Wife 2,Wife 3],[Husband 1,Husband 2,Husband 3] generates children:
+   child [Wife 2,Wife 3],[Boat,Husband 1,Wife 1,Husband 2,Husband 3]
+   child [Wife 3],[Boat,Husband 1,Wife 1,Husband 2,Wife 2,Husband 3]
+   child [Wife 2],[Boat,Husband 1,Wife 1,Husband 2,Husband 3,Wife 3]
+   child [Wife 1,Wife 3],[Boat,Husband 1,Husband 2,Wife 2,Husband 3]
+   child [Wife 1],[Boat,Husband 1,Husband 2,Wife 2,Husband 3,Wife 3]
+   child [Wife 1,Wife 2],[Boat,Husband 1,Husband 2,Husband 3,Wife 3]
+state [Wife 1,Husband 2,Wife 2],[Boat,Husband 1,Husband 3,Wife 3] generates children:
+   child [Boat,Husband 1,Wife 1,Husband 2,Wife 2],[Husband 3,Wife 3]
+   child [Boat,Husband 1,Wife 1,Husband 2,Wife 2,Husband 3],[Wife 3]
+state [Husband 1,Wife 1,Wife 2],[Boat,Husband 2,Husband 3,Wife 3] generates children:
+   child [Boat,Husband 1,Wife 1,Husband 2,Wife 2],[Husband 3,Wife 3]
+   child [Boat,Husband 1,Wife 1,Husband 2,Wife 2,Husband 3],[Wife 3]
+state [Boat,Wife 1,Husband 2,Wife 2,Wife 3],[Husband 1,Husband 3] generates children:
+   child [Wife 2,Wife 3],[Boat,Husband 1,Wife 1,Husband 2,Husband 3]
+   child [Husband 2,Wife 2],[Boat,Husband 1,Wife 1,Husband 3,Wife 3]
+   child [Wife 1,Wife 2,Wife 3],[Boat,Husband 1,Husband 2,Husband 3]
+   child [Wife 1,Wife 3],[Boat,Husband 1,Husband 2,Wife 2,Husband 3]
+   child [Wife 1,Wife 2],[Boat,Husband 1,Husband 2,Husband 3,Wife 3]
+</pre>
+</div>
+</div>
+
+</div><!-- end of jb-print jb-render -->
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-51318b78-8e3a-4a0e-9f2a-4a7ddb0cbc7a" ><span id="id-51318b78-8e3a-4a0e-9f2a-4a7ddb0cbc7a"><img id="img-id-51318b78-8e3a-4a0e-9f2a-4a7ddb0cbc7a"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-e78219a9-4564-47e7-a3de-24cbf5bf5691" ><span id="id-e78219a9-4564-47e7-a3de-24cbf5bf5691"><img id="img-id-e78219a9-4564-47e7-a3de-24cbf5bf5691" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00009_frag_00001" data-state="slide_00009_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span><span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">jealous_husbands_is_goal</span>( state ):
+    result <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">True</span>
+    <span style="color: #008000; font-weight: bold">for</span> o <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #008000">len</span>(state)):
+        <span style="color: #008000; font-weight: bold">if</span> state[o] <span style="color: #666666">!=</span> RIGHT:
+            result <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">False</span>
+            <span style="color: #008000; font-weight: bold">break</span>
+    <span style="color: #008000; font-weight: bold">return</span> result
+    
+</pre></div>
+
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-0a474311-ef70-4403-9df3-fb0acb58ba97" ><span id="id-0a474311-ef70-4403-9df3-fb0acb58ba97"><img id="img-id-0a474311-ef70-4403-9df3-fb0acb58ba97"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-9483f6f2-25ec-4c36-b4d6-ec109734762e" ><span id="id-9483f6f2-25ec-4c36-b4d6-ec109734762e"><img id="img-id-9483f6f2-25ec-4c36-b4d6-ec109734762e" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00010_frag_00001" data-state="slide_00010_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+
+<div class="jb-output-code jb-render">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-output jb-render">
+<div class="document" id="implementation-of-iterative-deepening-depth-first-search">
+<h1 class="title">Implementation of Iterative Deepening Depth First Search</h1>
+<div class="jb-text docutils container">
+<p>We will now implement the iterative deepening depth first search algorithm to solve the puzzle.</p>
+<p>The algorithm maintains a cutoff value for the depth of the search.</p>
+<p>If the algorithm fails to find a solution, then the depth limit is increased</p>
+</div>
+</div>
+
+</div><!-- end of jb-output jb-render -->
+</div><!-- end of jb-output-code jb-render -->
+
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-a1050c7d-7adf-4bb5-a9b8-a6bbb41516e7" ><span id="id-a1050c7d-7adf-4bb5-a9b8-a6bbb41516e7"><img id="img-id-a1050c7d-7adf-4bb5-a9b8-a6bbb41516e7"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-e30e4da5-512e-4bbf-9706-560e685a3c9b" ><span id="id-e30e4da5-512e-4bbf-9706-560e685a3c9b"><img id="img-id-e30e4da5-512e-4bbf-9706-560e685a3c9b" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00011_frag_00001" data-state="slide_00011_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div style="font-size:0.5em"><!-- start of style="font-size:0.5em" -->
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span><span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">search</span>( initial, successor_func, is_goal_func, dfs <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">True</span>, node_limit <span style="color: #666666">=</span> <span style="color: #666666">1000</span>, depth_limit <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">None</span> ):
+    queue <span style="color: #666666">=</span> [ ( initial, [initial] ) ]
+    num_nodes <span style="color: #666666">=</span> <span style="color: #666666">1</span>
+    max_queue <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+    sol <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">None</span>
+    <span style="color: #408080; font-style: italic">#print(&quot;Search started&quot;, queue)</span>
+    <span style="color: #008000; font-weight: bold">while</span>( <span style="color: #008000">len</span>( queue ) <span style="color: #666666">&gt;</span> <span style="color: #666666">0</span> ):
+        <span style="color: #408080; font-style: italic"># current, chist = queue[-1]</span>
+        <span style="color: #408080; font-style: italic"># queue = queue[0:-1]</span>
+        <span style="color: #408080; font-style: italic">#print(&quot;Q&quot;, queue)</span>
+        <span style="color: #008000; font-weight: bold">if</span> ( <span style="color: #008000">len</span>(queue) <span style="color: #666666">&gt;</span> max_queue ):
+              max_queue <span style="color: #666666">=</span> <span style="color: #008000">len</span>(queue)
+        current, chist <span style="color: #666666">=</span> queue<span style="color: #666666">.</span>pop()
+        <span style="color: #408080; font-style: italic">#print(&quot;Num Nodes&quot;, numNodes)</span>
+        <span style="color: #408080; font-style: italic">#print( len(chist), depthLimit, printState( current ) )</span>
+        <span style="color: #008000; font-weight: bold">if</span> is_goal_func( current ):
+            sol <span style="color: #666666">=</span> chist
+            <span style="color: #008000; font-weight: bold">break</span>
+        <span style="color: #008000; font-weight: bold">if</span> ( depth_limit <span style="color: #AA22FF; font-weight: bold">is</span> <span style="color: #008000; font-weight: bold">None</span> ) <span style="color: #AA22FF; font-weight: bold">or</span> ( <span style="color: #008000">len</span>(chist) <span style="color: #666666">&lt;=</span> depth_limit ):
+            <span style="color: #408080; font-style: italic">#print(&quot;current state&quot;, current, chist )</span>
+            <span style="color: #408080; font-style: italic">#print(&quot;queue&quot;, queue)</span>
+            children <span style="color: #666666">=</span> successor_func( current )
+            <span style="color: #408080; font-style: italic">#print(&quot;children&quot;, children)</span>
+            <span style="color: #008000; font-weight: bold">for</span> c <span style="color: #AA22FF; font-weight: bold">in</span> children:
+                <span style="color: #008000; font-weight: bold">if</span> c <span style="color: #AA22FF; font-weight: bold">not</span> <span style="color: #AA22FF; font-weight: bold">in</span> chist:
+                    <span style="color: #408080; font-style: italic">#print(&quot;Add child&quot;, printState(c))</span>
+                    <span style="color: #008000; font-weight: bold">if</span> dfs:
+                      queue<span style="color: #666666">.</span>append((c, chist <span style="color: #666666">+</span> [c] ))
+                    <span style="color: #008000; font-weight: bold">else</span>:
+                      queue<span style="color: #666666">.</span>insert(<span style="color: #666666">0</span>, (c, chist <span style="color: #666666">+</span> [c] ) )
+                    num_nodes <span style="color: #666666">=</span> num_nodes <span style="color: #666666">+</span> <span style="color: #666666">1</span>
+                    <span style="color: #008000; font-weight: bold">if</span> ( num_nodes <span style="color: #666666">&gt;</span> node_limit ):
+                        <span style="color: #008000">print</span>(<span style="color: #BA2121">&quot;search terminated with num_nodes&quot;</span>, num_nodes )
+                        <span style="color: #008000; font-weight: bold">return</span> ( num_nodes, max_queue, <span style="color: #008000; font-weight: bold">None</span> )
+        <span style="color: #408080; font-style: italic"># else:</span>
+        <span style="color: #408080; font-style: italic">#   print(&quot;Depth cutoff&quot;, len(chist), &quot;&gt;&quot;, depth_limit )</span>
+    <span style="color: #008000; font-weight: bold">return</span> ( num_nodes, max_queue, sol )
+</pre></div>
+
+</div><!-- end of style="font-size:0.5em" -->
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-baa72ff8-d7d3-4c1d-96a4-6fbdff71b517" ><span id="id-baa72ff8-d7d3-4c1d-96a4-6fbdff71b517"><img id="img-id-baa72ff8-d7d3-4c1d-96a4-6fbdff71b517"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-046fe5e1-9fed-4a6f-9242-fd0ece4b240f" ><span id="id-046fe5e1-9fed-4a6f-9242-fd0ece4b240f"><img id="img-id-046fe5e1-9fed-4a6f-9242-fd0ece4b240f" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00012_frag_00001" data-state="slide_00012_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span><span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">iddfs</span>( initial, successors, is_goal, node_limit ):
+    sol <span style="color: #666666">=</span> (<span style="color: #666666">0</span>,<span style="color: #666666">0</span>,<span style="color: #008000; font-weight: bold">None</span>)
+    depth_limit <span style="color: #666666">=</span> <span style="color: #666666">1</span>
+    sumNodes <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+    maxQueue <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+    <span style="color: #008000; font-weight: bold">while</span>( sol[<span style="color: #666666">2</span>] <span style="color: #AA22FF; font-weight: bold">is</span> <span style="color: #008000; font-weight: bold">None</span> ):
+        sol <span style="color: #666666">=</span> search( initial, successors, is_goal, <span style="color: #008000; font-weight: bold">True</span>, node_limit, depth_limit )
+        n,q,s <span style="color: #666666">=</span> sol
+        sumNodes <span style="color: #666666">=</span> sumNodes <span style="color: #666666">+</span> n 
+        <span style="color: #008000; font-weight: bold">if</span> maxQueue <span style="color: #666666">&lt;</span> q:
+            maxQueue <span style="color: #666666">=</span> q
+        depth_limit <span style="color: #666666">=</span> depth_limit <span style="color: #666666">+</span> <span style="color: #666666">1</span>
+    <span style="color: #008000">print</span>(<span style="color: #BA2121">&quot;Depth limit&quot;</span>, depth_limit )
+    <span style="color: #008000; font-weight: bold">return</span> ( sumNodes, maxQueue, sol[<span style="color: #666666">2</span>] )
+</pre></div>
+
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-ac293f84-12c5-4f25-8216-8d7a40d67c57" ><span id="id-ac293f84-12c5-4f25-8216-8d7a40d67c57"><img id="img-id-ac293f84-12c5-4f25-8216-8d7a40d67c57"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-eaafd2a3-eebd-4fe0-860c-a661bffe8419" ><span id="id-eaafd2a3-eebd-4fe0-860c-a661bffe8419"><img id="img-id-eaafd2a3-eebd-4fe0-860c-a661bffe8419" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00013_frag_00001" data-state="slide_00013_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+<div class="jb-input jb-render jb-code" style="text-align:center">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-input-code jb-render">
+<div class="highlight" style="background: #f8f8f8; color:#101010;display=inline-block;"><pre style="line-height: 125%"><span></span>sol <span style="color: #666666">=</span> iddfs( initial, jealous_husbands_successors, jealous_husbands_is_goal, <span style="color: #666666">10e8</span> )
+<span style="color: #008000; font-weight: bold">if</span> sol[<span style="color: #666666">2</span>]:
+    nNodes, maxQueue, trace <span style="color: #666666">=</span> sol
+    <span style="color: #008000">print</span>(<span style="color: #BA2121">&#39;Solution&#39;</span>, nNodes, <span style="color: #BA2121">&#39;length&#39;</span>, <span style="color: #008000">len</span>(trace), <span style="color: #BA2121">&#39;max queue size&#39;</span>, maxQueue )
+    <span style="color: #008000">print</span>(<span style="color: #BA2121">&quot;Solution Trace&quot;</span> )
+    <span style="color: #008000; font-weight: bold">for</span> s <span style="color: #AA22FF; font-weight: bold">in</span> trace:
+        <span style="color: #008000">print</span>( printState( s ) )
+    <span style="color: #008000">print</span>(<span style="color: #BA2121">&quot;End of Solution&quot;</span>)
+    iddfsNodes <span style="color: #666666">=</span> nNodes
+    iddfsMemory <span style="color: #666666">=</span> maxQueue
+</pre></div>
+
+</div><!-- end of jb-input-code jb-render -->
+
+</div>
+<div class="jb-print jb-render">
+<div class="jb-output jb-render code" style="text-align:center">
+<div class="jb-stdout code" style="display:inline-block; width:90%">
+<pre >
+Depth limit 12
+Solution 6199 length 12 max queue size 20
+Solution Trace
+[Boat,Husband 1,Wife 1,Husband 2,Wife 2,Husband 3,Wife 3],[]
+[Husband 1,Wife 1,Husband 2,Wife 2],[Boat,Husband 3,Wife 3]
+[Boat,Husband 1,Wife 1,Husband 2,Wife 2,Husband 3],[Wife 3]
+[Husband 1,Husband 2,Husband 3],[Boat,Wife 1,Wife 2,Wife 3]
+[Boat,Husband 1,Husband 2,Husband 3,Wife 3],[Wife 1,Wife 2]
+[Husband 3,Wife 3],[Boat,Husband 1,Wife 1,Husband 2,Wife 2]
+[Boat,Husband 2,Wife 2,Husband 3,Wife 3],[Husband 1,Wife 1]
+[Wife 2,Wife 3],[Boat,Husband 1,Wife 1,Husband 2,Husband 3]
+[Boat,Wife 1,Wife 2,Wife 3],[Husband 1,Husband 2,Husband 3]
+[Wife 1],[Boat,Husband 1,Husband 2,Wife 2,Husband 3,Wife 3]
+[Boat,Wife 1,Wife 3],[Husband 1,Husband 2,Wife 2,Husband 3]
+[],[Boat,Husband 1,Wife 1,Husband 2,Wife 2,Husband 3,Wife 3]
+End of Solution
+</pre>
+</div>
+</div>
+
+</div><!-- end of jb-print jb-render -->
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-ca7e5e9a-1a1d-4104-b6c6-b57391e8f8f2" ><span id="id-ca7e5e9a-1a1d-4104-b6c6-b57391e8f8f2"><img id="img-id-ca7e5e9a-1a1d-4104-b6c6-b57391e8f8f2"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-0a347431-044b-47f3-8aac-e141214ec381" ><span id="id-0a347431-044b-47f3-8aac-e141214ec381"><img id="img-id-0a347431-044b-47f3-8aac-e141214ec381" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+<section id="slide_00014_frag_00001" data-state="slide_00014_frag_00001">
+
+
+<!-- Header -->
+  
+
+<!-- Background -->
+
+
+<!-- Slide -->
+<div class="jb-slide">
+
+<div class="jb-output-code jb-render">
+
+<!-- start embedded style -->
+
+<!-- end embedded style -->
+<div class="jb-output jb-render">
+
+<h1>Comparison of Memory and Number of Nodes</h1>
+
+<table>
+<tr>
+<th>Search Algorithm</th>
+<th>Number of Nodes</th>
+<th>Memory</th>
+</tr>
+<tr>
+<td>Depth First Search</td>
+<td>45</td>
+<td>24</td>
+</tr>
+<tr>
+<td>Breadth First Search</td>
+<td>4512</td>
+<td>1998</td>
+</tr>
+<tr>
+<td>Iterative Deepening Depth First Search</td>
+<td>6199</td>
+<td>20</td>
+</tr>
+</table>
+</div><!-- end of jb-output jb-render -->
+</div><!-- end of jb-output-code jb-render -->
+
+
+</div>
+<!-- Footer -->
+
+<div class="jb-footer-left plain">
+    <span id="id-38d8579a-7846-48f7-8c20-b65e7f8710d3" ><span id="id-38d8579a-7846-48f7-8c20-b65e7f8710d3"><img id="img-id-38d8579a-7846-48f7-8c20-b65e7f8710d3"     src="assets/images/logo.png"/></span>
+</span>
+
+</div>
+<div class="jb-footer-right plain">
+    <span id="id-660ed096-d7b5-410f-89c4-840321d27c1f" ><span id="id-660ed096-d7b5-410f-89c4-840321d27c1f"><img id="img-id-660ed096-d7b5-410f-89c4-840321d27c1f" width="162" height="138"   src="assets/images/robbi.png"/></span>
+</span>
+
+</div>
+
+<aside class="notes">
+
+</aside>
+
+
+
+</section>
+        </div>
+        </div>
+
+        <script src="js/reveal.js"></script>
+
+        <script>
+            // More info about config & dependencies:
+            // - https://github.com/hakimel/reveal.js#configuration
+            // - https://github.com/hakimel/reveal.js#dependencies
+            Reveal.initialize({
+                math: {
+                    mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+                    config: 'TeX-AMS_HTML-full',  // See http://docs.mathjax.org/en/latest/config-files.html
+                    // tex2jax: {
+                    //     inlineMath: [['$', '$'], ['\(', '\)']],
+                    //     displayMath: [['$$', '$$'], ['\[', '\]']],
+                    //     processEscapes: true,
+                    //     processEnvironments: true,
+                    //     skipTags: ['script', 'noscript', 'style', 'textarea', 'code', 'pre'],
+                    //     displayAlign: 'center',
+                    // }                
+                },
+                dependencies: [
+                    { src: 'plugin/markdown/marked.js' },
+                    { src: 'plugin/markdown/markdown.js' },
+                    { src: 'plugin/notes/notes.js', async: true },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/math/math.js', async: true }
+                ]
+            });
+        </script>
+
+        <script>
+            <!-- Assets -->
+var assets = {
+"robbi" : new JBImage( "robbi", "12677", "162", "138", null, null, "assets/images/robbi", "png" ),
+"logo" : new JBImage( "logo", "12033", "0", "0", null, null, "assets/images/logo", "png" ),
+"fira-logo-1" : new JBImage( "fira-logo-1", "93836", "0", "0", null, null, "assets/images/FIRA-logo-1", "png" ),
+"pairLogo" : new JBImage( "pairLogo", "63051", "0", "0", null, null, "assets/images/pairLogo", "png" ) 
+};
+var assetInstances = {
+    "id-ea8fb90b-f121-4300-af7c-3c797969aa98": assets["robbi"],
+    "id-259e7ad5-3d9e-461e-aa4c-4935259412fd": assets["robbi"],
+    "id-b97a527f-8892-4f49-a407-b1f03611ad63": assets["robbi"],
+    "id-72fbe2fe-79d4-4931-bd23-24f75a86afdb": assets["robbi"],
+    "id-4c70e8c4-22c5-488a-9294-425ae1616380": assets["robbi"],
+    "id-ddd67595-b2d9-4efc-b1d5-558482275d67": assets["robbi"],
+    "id-e78219a9-4564-47e7-a3de-24cbf5bf5691": assets["robbi"],
+    "id-9483f6f2-25ec-4c36-b4d6-ec109734762e": assets["robbi"],
+    "id-e30e4da5-512e-4bbf-9706-560e685a3c9b": assets["robbi"],
+    "id-046fe5e1-9fed-4a6f-9242-fd0ece4b240f": assets["robbi"],
+    "id-eaafd2a3-eebd-4fe0-860c-a661bffe8419": assets["robbi"],
+    "id-0a347431-044b-47f3-8aac-e141214ec381": assets["robbi"],
+    "id-660ed096-d7b5-410f-89c4-840321d27c1f": assets["robbi"],
+    "id-6b87da46-3f2d-460f-b541-d78e368e2550": assets["logo"],
+    "id-a76242a9-6182-4309-bb4a-0d0059ddd99f": assets["logo"],
+    "id-3c4523dd-06d2-44e7-b4c0-c3169232cd53": assets["logo"],
+    "id-c9fb9e42-719b-46e6-9502-e6c50ecb5f68": assets["logo"],
+    "id-be28fbd8-3c38-4e20-b0af-fe183f1e4d5e": assets["logo"],
+    "id-235c4af4-4092-46c3-8748-e7f62a1226bd": assets["logo"],
+    "id-51318b78-8e3a-4a0e-9f2a-4a7ddb0cbc7a": assets["logo"],
+    "id-0a474311-ef70-4403-9df3-fb0acb58ba97": assets["logo"],
+    "id-a1050c7d-7adf-4bb5-a9b8-a6bbb41516e7": assets["logo"],
+    "id-baa72ff8-d7d3-4c1d-96a4-6fbdff71b517": assets["logo"],
+    "id-ac293f84-12c5-4f25-8216-8d7a40d67c57": assets["logo"],
+    "id-ca7e5e9a-1a1d-4104-b6c6-b57391e8f8f2": assets["logo"],
+    "id-38d8579a-7846-48f7-8c20-b65e7f8710d3": assets["logo"]
+};
+<!-- End of Assets -->
+
+            convertURLs(assetInstances, "smart-path");
+        </script>
+        <script>
+            <!-- Characters -->
+var characters =
+{};
+<!-- End of Characters -->
+
+        </script>
+    </body>
+</html>
